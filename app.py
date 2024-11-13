@@ -5,17 +5,22 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 model = GPT2LMHeadModel.from_pretrained('gpt2')
 
-# Initial prompt
-input_text = "Once upon a time"
+def generate_text(prompt, max_length=50, num_beams=5, no_repeat_ngram_size=2):
+    input_ids = tokenizer.encode(prompt, return_tensors='pt')
+    output = model.generate(input_ids, max_length=max_length, num_beams=num_beams, no_repeat_ngram_size=no_repeat_ngram_size)
+    return tokenizer.decode(output[0], skip_special_tokens=True)
 
-# Generate text iteratively
-for i in range(5):  # Adjust the number of iterations as needed
-    input_ids = tokenizer.encode(input_text, return_tensors='pt')
-    
-    # Set max_new_tokens instead of max_length
-    output = model.generate(input_ids, max_new_tokens=100, num_beams=5, no_repeat_ngram_size=2, early_stopping=True) 
-    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-    print(generated_text)
-    
-    # Only keep the newly generated text for the next iteration to avoid exceeding max length
-    input_text = generated_text # Update with the recent generated text only
+st.title("Text Generator")
+
+prompt = st.text_input("Enter your prompt:")
+max_length = st.slider("Max Length", 10, 100, 50)
+num_beams = st.slider("Number of Beams", 1, 5, 2)
+no_repeat_ngram_size = st.slider("No Repeat N-Gram Size", 1, 5, 2)
+
+if st.button("Generate"):
+    generated_text = generate_text(prompt, max_length, num_beams, no_repeat_ngram_size)
+    st.write(generated_text)
+
+
+
+
